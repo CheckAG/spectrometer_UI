@@ -11,6 +11,7 @@ import time
 
 
 from shiny import App, Inputs, Outputs, Session, reactive, render, ui
+import shinyswatch
 
 sns.set_theme(style="white")
 ser = serial.Serial()
@@ -64,6 +65,7 @@ app_ui = ui.page_sidebar(
             "Continuous Mode"
         )
     ),
+    shinyswatch.theme.flatly,
     ui.layout_columns(
         ui.card(
             ui.card_header("Received Spectra"),
@@ -124,7 +126,7 @@ app_ui = ui.page_sidebar(
                 "mc_pulse",
                 "Pulse:"
             ),
-            col_widths=(4,4,4)
+            col_widths=(2,2,2)
         )
     )
 )
