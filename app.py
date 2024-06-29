@@ -113,23 +113,21 @@ app_ui = ui.page_sidebar(
                 "Pulse:"
             ),
             ui.input_action_button(
-                "set_master",
+                "set_mc",
                 "Set Master Clock"
             ),
             ui.input_text(
-                "master_period",
+                "mc_period",
                 "Period:"
             ),
             ui.input_text(
-                "master_pulse",
+                "mc_pulse",
                 "Pulse:"
             ),
             col_widths=(4,4,4)
         )
     )
-
 )
-
 
 def server(input: Inputs, output: Outputs, session: Session):
 
@@ -168,6 +166,37 @@ def server(input: Inputs, output: Outputs, session: Session):
         btn = input.start_serial()
         if btn > 0 and ser.available():
             ser.write(s.encode('utf-8'))
+
+    @reactive.effect
+    @reactive.event(input.set_sh)
+    def setSHClock():
+        pulse = input.sh_pulse()
+        period = input.sh_period()
+        s = "SH:" + period + ":" + pulse
+        btn = input.start_serial()
+        if btn > 0 and ser.available():
+            ser.write(s.encode('utf-8'))
+    
+    @reactive.effect
+    @reactive.event(input.set_icg)
+    def setSHClock():
+        pulse = input.icg_pulse()
+        period = input.icg_period()
+        s = "ICG:" + period + ":" + pulse
+        btn = input.start_serial()
+        if btn > 0 and ser.available():
+            ser.write(s.encode('utf-8'))
+
+    @reactive.effect
+    @reactive.event(input.set_mc)
+    def setSHClock():
+        pulse = input.mc_pulse()
+        period = input.mc_period()
+        s = "MC:" + period + ":" + pulse
+        btn = input.start_serial()
+        if btn > 0 and ser.available():
+            ser.write(s.encode('utf-8'))
+
 
     @reactive.effect
     @reactive.event(input.continuous_mode)
