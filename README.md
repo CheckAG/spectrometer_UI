@@ -1,10 +1,12 @@
-This template gives you a basic Shiny dashboard.
-Shiny includes most of the components that you'll need to build performant data dashboards
-including:
+Spectrometer UI for testing and development.
+#Current Functionality
+- set clock timings
+- set Integration time
+- Recieve data from STM
+- display raw data
 
-- [Sidebar pages](https://shiny.posit.co/py/api/ui.layout_sidebar.html)
-- [Value boxes](https://shiny.posit.co/py/api/ui.value_box.html)
-- [Popovers](https://shiny.posit.co/py/api/ui.popover.html) and [tooltips](https://shiny.posit.co/py/api/ui.popover.html)
-- [Accordions](https://shiny.posit.co/py/api/ui.accordion.html)
-- [Modals](https://shiny.posit.co/py/api/ui.modal.html)
-- [Cards](https://shiny.posit.co/py/api/ui.card.html)
+#TODO
+- implement plotting
+- Continuous mode
+- parse input with header information
+- Error handling
