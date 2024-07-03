@@ -31,7 +31,7 @@ def update_plot(frame, serial_port, line):
 
 def main():
     # Open the serial port
-    ser = serial.Serial('COM17', 115200, timeout=1)
+    ser = serial.Serial('COM7', 115200, timeout=1)
 
     fig, ax = plt.subplots()
     x = np.arange(3000)  # 6000 data points
@@ -41,7 +41,8 @@ def main():
     ax.set_ylim(0, 4096)  # Assuming 12-bit ADC resolution
     ax.set_xlim(0, 3000)
 
-    ser.write("start".encode())
+    ser.write("CONT:10".encode())
+
     def animate(frame):
         return update_plot(frame, ser, line)
 
