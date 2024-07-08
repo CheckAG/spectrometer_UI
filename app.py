@@ -16,24 +16,26 @@ import shinyswatch
 
 sns.set_theme(style="white")
 ser = serial.Serial()
-plot_data = np.zeros(3000)
+plot_data = np.zeros(4900)
 plot_data = reactive.Value(plot_data)
 header = ""
 header = reactive.Value(header)
 header.set("waiting for data")
 
+buffer_size = 10000
+
 
 def read_data_from_serial(serial_port):
     # Read data from the serial port
     # Reading 6000 16-bit integers (12000 bytes)
-    raw_data = serial_port.read(6000)
+    raw_data = serial_port.read(buffer_size)
 
-    if len(raw_data) == 6000:
+    if len(raw_data) == buffer_size:
         # Convert the byte data to integers
         data = []
         temp = raw_data[:200]
         header = ''.join(chr(i) for i in temp)
-        for i in range(202, len(raw_data), 2):
+        for i in range(200, len(raw_data), 2):
             value = int.from_bytes(
                 raw_data[i:i+2], byteorder='little', signed=False)
             data.append(value)
@@ -79,7 +81,7 @@ app_ui = ui.page_sidebar(
     ui.layout_columns(
         ui.card(
             ui.card_header("Received Spectra"),
-            # ui.output_plot("plot_fig"),
+            ui.output_plot("plot_fig"),
             ui.card_footer(
                 ui.input_action_button(
                     "clear_data",
@@ -88,14 +90,13 @@ app_ui = ui.page_sidebar(
             ),
             height="70vh"
         ),
-        ui.card(
-            ui.card_header("Raw Data"),
-            ui.output_text_verbatim(
-                "raw_output",
-                placeholder=True
-            ),
-            height="70vh"
-        ),
+        # ui.card(
+        #     ui.card_header("Raw Data"),
+        #     ui.output_text(
+        #         "raw_output"
+        #     ),
+        #     height="70vh"
+        # ),
         ui.card(
             ui.card_header("Header Data"),
             ui.output_text_verbatim(
@@ -103,7 +104,8 @@ app_ui = ui.page_sidebar(
                 placeholder=True
             ),
             height="30vh",
-        )
+        ),
+        col_widths=(8, 4)
     )
 )
 
@@ -137,10 +139,10 @@ def server(input: Inputs, output: Outputs, session: Session):
             if ser.inWaiting():
                 print("recieved data")
                 data = read_data_from_serial(ser)
-                plot_data = data[0]
-                header = data[1]
+                plot_data.set(data[0])
+                header.set(data[1])
                 print(data[0])
-                print(header)
+                print(data[1])
             else:
                 print(f"Sent {s}, No Data Recieved")
 
@@ -160,30 +162,31 @@ def server(input: Inputs, output: Outputs, session: Session):
         print("Not Implemented")
         pass
 
-    @render.text
-    def raw_output():
-        global ser
-        global test_data
-        btn = input.start_serial()
-        if btn > 0:
-            return str(test_data)
-        return "waiting for data"
+    # @render.text
+    # def raw_output():
+    #     global ser
+    #     global test_data
+    #     btn = input.start_serial()
+    #     if btn > 0:
+    #         return str(plot_data.get())
+    #     return "waiting for data"
 
     @render.text
     def header_text():
         global header
-        return header
+        return str(header.get())
 
     @render.plot
     def plot_fig():
-        fig, ax = plt.subplots()
-        x = np.arange(3000)  # 6000 data points
-        y = np.plot_data  # Initial data
-        ax.plot(x, y)
+        # fig, ax = plt.subplots()
+        x = np.arange(4900)  # 6000 data points
+        plot_data_temp = plot_data.get()
+        y = np.array(plot_data_temp)  # Initial data
 
-        ax.set_ylim(0, 4096)  # Assuming 12-bit ADC resolution
-        ax.set_xlim(0, 3000)
-        return fig
+        line = plt.plot(x, y)
+        plt.ylim((0, 4096))  # Assuming 12-bit ADC resolution
+        plt.xlim((0, 4900))
+        return line
 
 
 app = App(app_ui, server)
