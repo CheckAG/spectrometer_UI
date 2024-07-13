@@ -6,7 +6,7 @@ import seaborn as sns
 import serial
 import numpy as np
 import matplotlib.pyplot as plt
-
+import datetime
 import time
 
 from test12 import *
@@ -86,6 +86,10 @@ app_ui = ui.page_sidebar(
                 ui.input_action_button(
                     "clear_data",
                     "Clear Data"
+                ),
+                ui.download_button(
+                    "download_spectrum",
+                    "Download as CSV"
                 )
             ),
             height="70vh"
@@ -118,7 +122,11 @@ def server(input: Inputs, output: Outputs, session: Session):
         global ser
         port = input.com_port()
         baud = input.baudrate()
-        ser = serial.Serial(port, baud, timeout=1)
+        try:
+            ser = serial.Serial(port, baud, timeout=1)
+        except:
+            print("File not found")
+            pass
         pass
 
     @reactive.effect
@@ -141,8 +149,6 @@ def server(input: Inputs, output: Outputs, session: Session):
                 data = read_data_from_serial(ser)
                 plot_data.set(data[0])
                 header.set(data[1])
-                print(data[0])
-                print(data[1])
             else:
                 print(f"Sent {s}, No Data Recieved")
 
@@ -187,6 +193,17 @@ def server(input: Inputs, output: Outputs, session: Session):
         plt.ylim((0, 4096))  # Assuming 12-bit ADC resolution
         plt.xlim((0, 4900))
         return line
+
+    @render.download(
+        filename=lambda: f"Spectrum-{datetime.datetime.now()}.csv"
+    )
+    def download_spectrum():
+        x = np.arange(4900)
+        data = plot_data.get()
+        temp_df = pd.DataFrame(data={"Frequency": x, "wavelength": data})
+        temp_df.to_csv("./temp.csv", sep=",", index=False)
+        path = "./temp.csv"
+        return path
 
 
 app = App(app_ui, server)
