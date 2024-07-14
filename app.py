@@ -94,13 +94,6 @@ app_ui = ui.page_sidebar(
             ),
             height="70vh"
         ),
-        # ui.card(
-        #     ui.card_header("Raw Data"),
-        #     ui.output_text(
-        #         "raw_output"
-        #     ),
-        #     height="70vh"
-        # ),
         ui.card(
             ui.card_header("Header Data"),
             ui.output_text_verbatim(
@@ -124,10 +117,10 @@ def server(input: Inputs, output: Outputs, session: Session):
         baud = input.baudrate()
         try:
             ser = serial.Serial(port, baud, timeout=1)
-        except:
-            print("File not found")
+        except serial.SerialException as e:
+            id = ui.notification_show("Error: " + str(e), duration=6, type="error")
             pass
-        pass
+
 
     @reactive.effect
     @reactive.event(input.recv_data)
@@ -137,7 +130,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         global header
         btn = input.start_serial()
         if btn == 0:
-            print("Serial Port not opened")
+            id = ui.notification_show("Error: Please open a serial port before attempting to recieve data",
+                                      duration=6, type="error")
         else:
             it = input.integration_time()
             s = "START:" + it
@@ -166,16 +160,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.event(input.continuous_mode)
     def sendContinuous():
         print("Not Implemented")
-        pass
-
-    # @render.text
-    # def raw_output():
-    #     global ser
-    #     global test_data
-    #     btn = input.start_serial()
-    #     if btn > 0:
-    #         return str(plot_data.get())
-    #     return "waiting for data"
+        pass   
 
     @render.text
     def header_text():
